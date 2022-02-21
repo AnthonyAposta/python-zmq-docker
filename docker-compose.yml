@@ -1,0 +1,29 @@
+version: "3.9"
+services:
+  crawler:
+    build: crawlers/
+    container_name: crawler-service
+    networks:
+      - microservices-network
+    depends_on:
+      - gateway
+
+  gateway:
+    build: gateway/
+    container_name: gateway-service
+    networks:
+      - microservices-network
+
+  consumer:
+    build: consumer/
+    container_name: consumer-service
+    networks:
+      - microservices-network
+    depends_on:
+      - crawler
+      - gateway
+
+
+networks:
+  microservices-network:
+    driver: bridge
