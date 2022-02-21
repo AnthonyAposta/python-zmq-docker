@@ -9,7 +9,7 @@ context = zmq.Context()
 receiver = context.socket(zmq.SUB)
 receiver.connect('tcp://gateway-service:3231')
 #receiver.connect('tcp://0.0.0.0:3231')
-receiver.subscribe("crawler.crawler1")
+receiver.subscribe("crawler.python")
 
 print('waiting for messages')
 while True:

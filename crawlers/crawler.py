@@ -1,37 +1,61 @@
 # crawler to receive data from twitter api
-
+from email import message
+import imp
 import json
-from pydoc_data import topics
+from os import stat
 import zmq
 from time import sleep
+import tweepy
+from dotenv import load_dotenv
+import os
 
 
-def message_encoder(topic_str: str, message_dict: dict) -> bytes:
+class Intantiate(tweepy.Stream):
 
-    message_json = json.dumps(message_dict)
-    
-    message = topic_str + ' ' + message_json
+    def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret):
+        super().__init__(consumer_key, consumer_secret, access_token, access_token_secret)
 
-    encoded_message = str.encode(message)
+        context = zmq.Context()
+        self.socket = context.socket(zmq.PUB)
 
-    return encoded_message 
+        print("conneting to xpub")
+        # Creates a socket instance
 
-# Creates a socket instance
-context = zmq.Context()
-socket = context.socket(zmq.PUB)
+        #socket.connect("tcp://0.0.0.0:5001")
+        self.socket.connect("tcp://gateway-service:5001")
+        self.topic = 'crawler.python'
 
-print("conneting to xpub")
-socket.connect("tcp://gateway-service:5001")
-#socket.connect("tcp://0.0.0.0:5001")
 
-topic = 'crawler.crawler1'
+    def message_encoder(self, topic_str: str, message_dict: dict) -> bytes:
 
-# Sends a string message
-message_id = 0
-while True:
+        message_json = json.dumps(message_dict)
+        
+        message = topic_str + ' ' + message_json
 
-    message_id += 1
-    message = {"message": "this is a message", "id": message_id}
-    socket.send( message_encoder(topic, message) )
-    print(message)
-    sleep(1)
+        encoded_message = str.encode(message)
+
+        return encoded_message 
+
+    def on_status(self, status):
+        
+        status_json = status._json
+
+        message = {"text": status_json["text"], "timestamp_ms": status_json["timestamp_ms"]}
+        self.socket.send(self.message_encoder(self.topic, message))
+
+        print(message)
+
+
+if __name__ == "__main__":
+
+    load_dotenv()
+    consumer_key = os.getenv('consumer_key')
+    consumer_secret = os.getenv('consumer_secret')
+    access_token = os.getenv('access_token')
+    access_token_secret = os.getenv('access_token_secret')
+
+
+    instance = Intantiate(consumer_key, consumer_secret, access_token, access_token_secret)
+    instance.filter(track=["python"])
+
+
