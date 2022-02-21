@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 import os
 
 
-class Intantiate(tweepy.Stream):
+class Instantiate(tweepy.Stream):
 
     def __init__(self, consumer_key, consumer_secret, access_token, access_token_secret):
         super().__init__(consumer_key, consumer_secret, access_token, access_token_secret)
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     access_token_secret = os.getenv('access_token_secret')
 
 
-    instance = Intantiate(consumer_key, consumer_secret, access_token, access_token_secret)
+    instance = Instantiate(consumer_key, consumer_secret, access_token, access_token_secret)
     instance.filter(track=["python"])
 
 
